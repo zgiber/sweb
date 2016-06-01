@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -129,8 +130,21 @@ func handleApp(w http.ResponseWriter, r *http.Request) {
 
 	data, err := Asset("swagger-editor" + path)
 	if err != nil {
-		http.Error(w, "resource not found", http.StatusNotFound)
+		log.Println(path)
+		http.Error(w, "resource not found"+path, http.StatusNotFound)
 	}
+
+	contentType := http.DetectContentType(data)
+	w.Header().Set("Content-Type", contentType)
+
+	if strings.HasSuffix(path, ".js") {
+		w.Header().Set("Content-Type", "application/javascript")
+	}
+
+	if strings.HasSuffix(path, ".css") {
+		w.Header().Set("Content-Type", "text/css")
+	}
+
 	w.Write(data)
 }
 
